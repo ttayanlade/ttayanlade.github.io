@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7467KWZ9K9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-7467KWZ9K9');
+  </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>CUDA Path Planning | Timilehin Ayanlade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+  <link rel="icon" type="image/png" href="../images/seal_icon.png">
+</head>
+<body>
+  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+    <tbody>
+      <tr>
+        <td class="project-page">
+          <a class="back-link" href="../index.html">&larr; Back to home</a>
+
+          <heading>CUDA-Accelerated Path Planning</heading>
+          <p>
+            <a href="https://github.com/ttayanlade/Cuda_Path_planning_CPP" target="_blank">GitHub repository</a> &nbsp;|&nbsp;
+            Sampling-based motion planning with GPU acceleration
+          </p>
+
+          <h2>Overview</h2>
+          <p>
+            This project implements and benchmarks sampling-based motion planning algorithms — PRM, RRT, and RRT* — with CUDA-accelerated variants for the computationally expensive distance and collision-checking steps. The goal is to speed up path planning in environments ranging from simple open spaces to procedurally generated obstacle fields.
+          </p>
+          <p>
+            The pipeline builds a configuration-space graph by randomly sampling points, connecting nearby nodes, and checking edges for collisions against rectangular and polygonal obstacles. Once a path from start to goal is found, the planner returns the route and its cost.
+          </p>
+
+          <h2>Algorithms and environments</h2>
+          <p>The project supports four algorithm modes and four environment types:</p>
+          <ul>
+            <li><strong>Algorithms:</strong> RRT, RRT*, RRT (GPU), RRT* (GPU)</li>
+            <li><strong>Edge types:</strong> Straight-line or Dubins curves (for non-holonomic vehicles)</li>
+            <li><strong>Environments:</strong>
+              <ul>
+                <li><em>Simple</em> — Two rectangular obstacles in an open space.</li>
+                <li><em>Complex</em> — Seven obstacles with tighter passages.</li>
+                <li><em>Complex pro</em> — Procedurally generated convex-hull obstacles with random start/goal pairs. Supports obstacle merging for denser layouts.</li>
+                <li><em>Blocked</em> — A single large obstacle for stress-testing replanning.</li>
+              </ul>
+            </li>
+          </ul>
+          <p>Example usage:</p>
+          <pre style="background:#f5f5f5;padding:12px;border-radius:4px;font-size:13px;overflow-x:auto;">python CPP.py --alg rrt_star --env complex</pre>
+
+          <h2>GPU acceleration</h2>
+          <p>
+            The CUDA variants offload the most expensive operations — pairwise Euclidean distance computation and collision checking across large batches of sampled points — to the GPU using Numba CUDA kernels. This is especially beneficial in the <em>complex pro</em> environment, where hundreds or thousands of iterations are needed to find a feasible path through dense, randomly generated obstacle fields.
+          </p>
+          <p>
+            The project logs per-iteration timing and total planning time, and can export results to Excel for benchmarking across seeds, environments, and algorithm choices.
+          </p>
+
+          <h2>Connection to agriculture</h2>
+          <p>
+            Path planning is not just a robotics exercise — it sits at the center of autonomous field operations. In precision agriculture, a robot or implement needs to navigate row crops, avoid obstacles (trees, rocks, irrigation equipment), and reach specific locations in the field efficiently. Sampling-based planners like RRT* are well-suited to this because fields are semi-structured but not perfectly predictable: rows provide general direction, but local conditions (wet spots, fallen branches, terrain variation) create dynamic obstacles.
+          </p>
+          <p>
+            GPU acceleration matters here because agricultural machines often need to replan in real time. A sprayer or scout robot that detects a new obstacle — or receives an updated target location — cannot wait seconds for a CPU-only planner to converge. Faster planning means the machine can react to changing field conditions without stopping.
+          </p>
+
+          <h2>Weed identification → path planning → actuation</h2>
+          <p>
+            A concrete pipeline I have been building toward connects perception, planning, and action in the field:
+          </p>
+          <ol>
+            <li><strong>Perception — Weed identification.</strong> I previously built <strong>WeedNet</strong>, a self-supervised classifier pretrained on millions of plant images from iNaturalist, deployed as a REST API (WeedId) for field-level weed species identification from photos. Given a camera image, the model returns the weed class and a confidence score.</li>
+            <li><strong>Localization.</strong> The detected weed location is mapped to GPS or local field coordinates (via the robot's camera extrinsics and a field map).</li>
+            <li><strong>Path planning.</strong> A motion planner — like the CUDA-accelerated RRT* in this project — computes a collision-free route from the robot's current position to the weed target, respecting row geometry, turn radius (Dubins edges), and static obstacles.</li>
+            <li><strong>Actuation.</strong> The robot follows the planned path and triggers a spot-spray or mechanical removal at the target location, treating only the identified weed rather than broadcasting chemicals across the entire field.</li>
+          </ol>
+          <p>
+            This "identify → plan → act" loop is the same pattern as the VLA driving agents in my other playground projects, but applied to real agricultural machinery. Perception tells you <em>what</em> and <em>where</em>; path planning tells you <em>how to get there</em>; actuation closes the loop.
+          </p>
+          <p>
+            The CUDA path planning work provides the planning layer of that stack. By benchmarking GPU vs. CPU planners across environment complexities, I can choose the right trade-off between planning speed and path quality for field deployment — where replanning latency directly affects how quickly a robot can treat newly detected weeds.
+          </p>
+
+          <h2>Future work</h2>
+          <ul>
+            <li>Integrate Dubins-curve planning for non-holonomic field robots (tractors, row-followers).</li>
+            <li>Feed live weed detection coordinates from WeedNet into the planner for end-to-end field demos.</li>
+            <li>Benchmark replanning latency under simulated field conditions (row corridors, dynamic obstacles).</li>
+            <li>Explore multi-target planning: given a set of detected weeds, compute an efficient treatment tour.</li>
+          </ul>
+
+          <p style="text-align:right;font-size:small;margin-top:40px;">
+            <a href="../index.html">Back to home</a>
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

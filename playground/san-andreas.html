@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7467KWZ9K9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-7467KWZ9K9');
+  </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>GTA San Andreas VLA Agent | Timilehin Ayanlade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+  <link rel="icon" type="image/png" href="../images/seal_icon.png">
+</head>
+<body>
+  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+    <tbody>
+      <tr>
+        <td class="project-page">
+          <a class="back-link" href="../index.html">&larr; Back to home</a>
+
+          <heading>GTA San Andreas — VLA Agent</heading>
+          <span class="status-badge">In progress</span>
+
+          <h2>Status</h2>
+          <p>
+            This project is in the early planning stage. The goal is to extend the vision-language-action driving loop I built for City Car Driving to <strong>Grand Theft Auto: San Andreas</strong> — a full 3D open-world environment with richer visuals, more complex traffic, and varied terrain.
+          </p>
+
+          <h2>Why San Andreas?</h2>
+          <p>
+            The browser-based City Car Driving simulator was a good sandbox for prototyping the VLA loop, but it is limited: fixed camera angle, simple graphics, and predictable road layouts. GTA San Andreas offers a much harder and more realistic testbed — dynamic NPC traffic, intersections, hills, weather, and a third-person camera that moves with the vehicle. If a VLA agent can drive reasonably in San Andreas, it is a stronger signal that the approach generalizes.
+          </p>
+
+          <h2>Current blockers</h2>
+          <ul>
+            <li><strong>Game access.</strong> Running GTA San Andreas on my Mac requires purchasing the game (the paid version through Steam or Rockstar). I do not yet have a licensed copy set up on my current machine.</li>
+            <li><strong>Platform compatibility.</strong> San Andreas is a Windows-native title. Running it on macOS means either Boot Camp (not available on Apple Silicon), a Windows VM, or a compatibility layer like CrossOver/Wine — each with performance trade-offs that affect real-time screen capture and control.</li>
+            <li><strong>Screen capture region.</strong> Unlike the browser game where the window position is fixed, a full-screen or windowed GTA instance will need dynamic region detection or a consistent windowed layout for reliable frame capture.</li>
+            <li><strong>Control mapping.</strong> GTA uses different key bindings and physics (handbrake, camera rotation, weapon switching) that the current agent does not handle. The action space will need to be redesigned for the 3D environment.</li>
+          </ul>
+
+          <h2>What I am planning</h2>
+          <ul>
+            <li>Purchase and install the licensed game on a Windows setup (either a dedicated machine or VM) for stable performance.</li>
+            <li>Adapt the existing VLA loop (<code>capture → infer → act</code>) with a windowed capture region and GTA-specific control prompts.</li>
+            <li>Start with simple tasks: drive straight on a highway, follow a road without crashing — before attempting city navigation or mission objectives.</li>
+            <li>Explore whether the OpenCV lane-assist overlay from the City Car Driving hybrid agent transfers to GTA's third-person camera, or whether a different telemetry injection strategy is needed.</li>
+            <li>Eventually connect RL fine-tuning, similar to the City Car Driving experiments, to improve sustained driving performance.</li>
+          </ul>
+
+          <p>
+            I will update this page once the environment is set up and the first agent runs are recorded.
+          </p>
+
+          <p style="text-align:right;font-size:small;margin-top:40px;">
+            <a href="../index.html">Back to home</a>
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

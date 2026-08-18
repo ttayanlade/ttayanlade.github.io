@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7467KWZ9K9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-7467KWZ9K9');
+  </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>City Car Driving VLA Agent | Timilehin Ayanlade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+  <link rel="icon" type="image/png" href="../images/seal_icon.png">
+</head>
+<body>
+  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+    <tbody>
+      <tr>
+        <td class="project-page">
+          <a class="back-link" href="../index.html">&larr; Back to home</a>
+
+          <heading>City Car Driving — Vision-Language-Action Agent</heading>
+          <p><em>A local vision-language loop that drives a browser-based car simulator using screen capture and keyboard control.</em></p>
+
+          <h2>The idea</h2>
+          <p>
+            This project explores whether a locally hosted vision-language model (VLM) can close the loop from pixels to physical actions — without cloud APIs, without a dedicated game SDK, and without any task-specific training data. The setup is deliberately minimal: capture the game window, send the frame to a VLM running on Ollama, parse a JSON action, and execute it as a macOS keystroke.
+          </p>
+          <p>
+            The target environment is <a href="https://www.citycardriving.com/" target="_blank">City Car Driving</a> running in a browser. Controls are limited to <code>w</code> (accelerate), <code>a</code>/<code>d</code> (steer), and <code>s</code> (brake). Each control loop iteration is: <strong>see → think → act</strong>.
+          </p>
+
+          <h2>Architecture</h2>
+          <p>The agent follows a standard vision-language-action (VLA) pattern:</p>
+          <ul>
+            <li><strong>Vision:</strong> Screen capture via <code>mss</code>, cropped to the game region and resized to reduce token load.</li>
+            <li><strong>Language / reasoning:</strong> Qwen2.5-VL (via Ollama) receives the image and a structured prompt, and returns a JSON action.</li>
+            <li><strong>Action:</strong> <code>pyautogui</code> translates the JSON into timed keypresses on the focused window.</li>
+          </ul>
+          <p>
+            I iterated through three agent variants, each building on the last:
+          </p>
+          <ul>
+            <li><strong><code>agent.py</code></strong> — The baseline. Full-resolution capture, default Qwen2.5-VL, single-key JSON output. Simple and readable, but slow (~10–16 s per inference).</li>
+            <li><strong><code>reasoning_agent.py</code></strong> — Switched to the 3B model variant, cropped out the sky, added chain-of-thought reasoning in the JSON response, and capped output tokens. Latency dropped to ~7–9 s per loop with more interpretable decisions.</li>
+            <li><strong><code>intelligent_agent.py</code></strong> — A hybrid approach. OpenCV runs lane-edge detection on each frame, overlays a red/green alignment guide and telemetry text onto the image, and passes that annotated frame to the VLM. The model gets both visual context and explicit lane-state text (e.g., "Drifting RIGHT → Recommend STEER LEFT"). This produced the most stable driving behavior.</li>
+          </ul>
+
+          <h2>Evaluating out-of-the-box VLMs</h2>
+          <p>
+            Before any fine-tuning, I wanted to understand what these models can do as-is on a continuous control task they were never trained for. The results were mixed but informative.
+          </p>
+          <p>
+            The full Qwen2.5-VL model could identify the road and generally chose to accelerate, but its ~15 s inference time made real-time control impossible — by the time an action executed, the scene had already changed. The 3B variant was fast enough to be usable (~7–9 s), and with chain-of-thought prompting it could reason about lane curvature and nearby barriers. However, it still struggled with sustained lane-keeping: it would drift, over-correct, and occasionally time out on longer reasoning chains.
+          </p>
+          <p>
+            The hybrid OpenCV + VLM agent was the most promising zero-shot configuration. By giving the model explicit lane telemetry rather than asking it to infer everything from raw pixels, steering corrections became more consistent. The model could focus on higher-level decisions (when to brake, when to steer hard) while the classical CV layer handled low-level alignment.
+          </p>
+          <p>
+            Key takeaways from the evaluation:
+          </p>
+          <ul>
+            <li>Latency is the primary bottleneck — any loop above ~2 s makes closed-loop driving unstable.</li>
+            <li>Prompt structure and output token limits matter as much as model size.</li>
+            <li>Injecting structured telemetry (even simple OpenCV overlays) significantly improves decision quality without any training.</li>
+            <li>Occasional timeouts and parse errors require fallback actions to keep the car moving.</li>
+          </ul>
+
+          <h2>Timing and model variants</h2>
+          <p>
+            I tracked end-to-end loop latency across configurations. Approximate numbers from my MacBook:
+          </p>
+          <ul>
+            <li><strong>Qwen2.5-VL (full)</strong> — 10–16 s inference. Too slow for closed-loop control.</li>
+            <li><strong>Qwen2.5-VL 3B</strong> — 7–9 s per loop with chain-of-thought. Usable but still sluggish.</li>
+            <li><strong>3B + image crop + token cap</strong> — Cropping the top 30% (sky) and resizing to 320×240, combined with <code>num_predict: 70</code>, kept responses short and consistent.</li>
+            <li><strong>Hybrid OpenCV + 3B</strong> — ~8 s steady-state after an initial ~26 s cold-start loop. The first inference is always slower due to model loading.</li>
+          </ul>
+          <p>
+            Several engineering choices helped reduce latency: JPEG compression at quality 75, aggressive image downsizing, hard output token limits, and low temperature (0.1–0.2) for deterministic driving decisions. Action durations are clamped to 0.1–0.5 s bursts to prevent over-steering during slow inference gaps.
+          </p>
+
+          <h2>Tuning with reinforcement learning</h2>
+          <p>
+            The zero-shot agents can keep the car on the road for short stretches, but they lack the consistency needed for longer drives or complex intersections. The next step is to fine-tune the policy with reinforcement learning — using the VLM as a starting policy and improving it through reward signals from the game environment (staying centered, avoiding collisions, maintaining speed).
+          </p>
+          <p>
+            I have two early RL-tuned runs recorded below. These represent initial experiments where the agent learns from driving outcomes rather than relying purely on pre-trained VLM behavior.
+          </p>
+
+          <p><strong>RL run A — lane keeping with corrections</strong></p>
+          <video controls preload="metadata">
+            <source src="videos/a.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+
+          <p><strong>RL run B — extended driving session</strong></p>
+          <video controls preload="metadata">
+            <source src="videos/b.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+
+          <h2>What's next</h2>
+          <ul>
+            <li>Reduce loop latency below 2 s — possibly via model distillation or a smaller specialized driving head.</li>
+            <li>Formalize the RL reward function and training loop for sustained lane keeping.</li>
+            <li>Test on more complex scenarios: intersections, traffic, and weather changes.</li>
+            <li>Connect insights back to agricultural robotics, where similar VLA loops could drive field platforms from camera input.</li>
+          </ul>
+
+          <p style="text-align:right;font-size:small;margin-top:40px;">
+            <a href="../index.html">Back to home</a>
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
