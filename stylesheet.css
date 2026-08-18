@@ -169,4 +169,50 @@ span.highlight {
   flex-shrink: 0; /* ensure the date doesn't shrink and become hidden */
 }
 
+.project-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2.5%;
+}
+
+.project-page h2 {
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 28px;
+  margin-bottom: 8px;
+}
+
+.project-page p,
+.project-page li {
+  line-height: 1.6;
+}
+
+.project-page ul {
+  padding-left: 20px;
+}
+
+.project-page video {
+  width: 100%;
+  max-width: 640px;
+  margin: 16px 0;
+  border-radius: 4px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.status-badge {
+  display: inline-block;
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
 /* ... (Other CSS styles) ... */
