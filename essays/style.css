@@ -1,0 +1,78 @@
+/* Paul Graham–inspired reading column */
+body {
+  margin: 0;
+  padding: 24px 16px 48px;
+  background: #fff;
+  color: #000;
+}
+
+.layout {
+  width: 100%;
+  max-width: 435px;
+  margin: 0 auto;
+  border: 0;
+  border-spacing: 0;
+  border-collapse: separate;
+}
+
+.layout td {
+  padding: 0;
+  vertical-align: top;
+}
+
+h1 {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 1.25rem;
+  font-weight: normal;
+  line-height: 1.4;
+  margin: 0 0 1.25em;
+  color: #822b28;
+}
+
+p.title {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 0.8125rem;
+  margin: 0 0 1em;
+}
+
+p.title a {
+  color: #000;
+  text-decoration: none;
+}
+
+p.title a:hover {
+  text-decoration: underline;
+}
+
+p {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  margin: 0 0 0.85em;
+}
+
+p.center {
+  text-align: center;
+}
+
+a {
+  color: #0000ee;
+}
+
+a:visited {
+  color: #551a8b;
+}
+
+i, em {
+  font-style: italic;
+}
+
+s, strike {
+  text-decoration: line-through;
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 16px 12px 32px;
+  }
+}
